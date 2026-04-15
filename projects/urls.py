@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import category_views, tags_views, projectImageUpload_views
+
+from .views import category_views, tags_views
+from .views import projectImageUpload_views
 
 urlpatterns = [
     path('categories/', category_views.CategoryListCreateView.as_view()),
