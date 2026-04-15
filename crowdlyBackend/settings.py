@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'accounts.UserProfile'
@@ -52,6 +53,7 @@ AUTH_USER_MODEL = 'accounts.UserProfile'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -154,3 +156,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
     'PAGE_SIZE': 12,
 } 
+CORS_ALLOW_CREDENTIALS = True
+if os.getenv("FRONTEND_URL"):
+    CORS_ALLOWED_ORIGINS = [os.getenv("FRONTEND_URL")]
+else:
+    CORS_ALLOWED_ORIGINS = []
