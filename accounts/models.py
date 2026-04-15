@@ -9,5 +9,6 @@ class UserProfile(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)    
     is_active = models.BooleanField(default=False)
+    google_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     def __str__(self):
         return self.username

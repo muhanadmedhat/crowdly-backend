@@ -17,7 +17,6 @@ class UsersView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
-
            user = request.user
            token = request.COOKIES.get("refresh_token")
            user.delete()
@@ -53,6 +52,8 @@ class UsersView(APIView):
         
 class UserCursorPagination(CursorPagination):
     ordering = 'id'
+
+
 class AdminsView(APIView):
     permission_classes = [IsAuthenticated,IsAdminUser]
     throttle_classes = [UserRateThrottle]
