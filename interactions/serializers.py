@@ -11,7 +11,7 @@ class ReplySerializer(serializers.ModelSerializer):
   class Meta:
     model = Reply
     fields = '__all__'
-    read_only_fields = ['id','author','created_at','updated_at']
+    read_only_fields = ['id','author','comment','created_at','updated_at']
 
 class RatingSerializer(serializers.ModelSerializer):
   class Meta:
@@ -33,10 +33,10 @@ class CommentReportSerializer(serializers.ModelSerializer):
   class Meta:
     model = CommentReport
     fields = '__all__'
-    read_only_fields = ['id','reporter' , 'created_at']
+    read_only_fields = ['id','comment','reporter' , 'created_at']
 
 class ReplyReportSerializer(serializers.ModelSerializer):
   class Meta:
     model = ReplyReport
     fields = '__all__'
-    read_only_fields = ['id','reporter' , 'created_at']
+    read_only_fields = ['id','reply','reporter' , 'created_at']
