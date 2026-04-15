@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Comment , Rating , Reply , ProjectReport , CommentReport
+from .models import Comment , Rating , Reply , ProjectReport , CommentReport , ReplyReport
 
 class CommentSerializer(serializers.ModelSerializer):
   class Meta:
@@ -18,6 +18,10 @@ class RatingSerializer(serializers.ModelSerializer):
     model = Rating
     fields = '__all__'
     read_only_fields = ['id', 'user' , 'created_at']
+  def validate_score(self,value):
+    if value < 1 or value > 5:
+      raise serializers.ValidationError("Rating must be between 1 and 5")
+    return value
 
 class ProjectReportSerializer(serializers.ModelSerializer):
   class Meta:
@@ -28,5 +32,11 @@ class ProjectReportSerializer(serializers.ModelSerializer):
 class CommentReportSerializer(serializers.ModelSerializer):
   class Meta:
     model = CommentReport
+    fields = '__all__'
+    read_only_fields = ['id','reporter' , 'created_at']
+
+class ReplyReportSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = ReplyReport
     fields = '__all__'
     read_only_fields = ['id','reporter' , 'created_at']
