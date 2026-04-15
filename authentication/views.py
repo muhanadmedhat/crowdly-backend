@@ -1,13 +1,16 @@
 from rest_framework.views import APIView, Response, status
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
-from .serializers import RegisterSerializer
-from accounts.models import UserProfile
-from .utils import send_verification_email,verify_token
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework.permissions import IsAuthenticated
 from django.core import signing
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
+from .serializers import RegisterSerializer
+from accounts.models import UserProfile
+from .utils import send_verification_email, verify_token
 # Create your views here.
 
 class RegisterView(APIView):
@@ -108,3 +111,8 @@ class CookieTokenRefreshView(TokenRefreshView):
             return response
         except Exception as e:
             return Response({"message": str(e)}, status=400)
+        
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = "http://localhost:3000/auth/google/callback" 
+    client_class = OAuth2Client

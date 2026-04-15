@@ -46,8 +46,15 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
 ]
-
+SITE_ID = 1
 AUTH_USER_MODEL = 'accounts.UserProfile'
 
 MIDDLEWARE = [
@@ -59,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'crowdlyBackend.urls'
@@ -129,7 +137,10 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
 APPEND_SLASH = False
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -160,8 +171,33 @@ REST_FRAMEWORK = {
         'user': '100/day'
     }
 } 
+
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
+    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_SAMESITE': 'Lax',
+    'SESSION_LOGIN': False,
+}
+
+# google get verifed autoamtically
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_REQUIRED = True
+
 CORS_ALLOW_CREDENTIALS = True
 if os.getenv("FRONTEND_URL"):
     CORS_ALLOWED_ORIGINS = [os.getenv("FRONTEND_URL")]
 else:
     CORS_ALLOWED_ORIGINS = []
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["email", "profile"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "key": "",
+        }
+    }
+}
