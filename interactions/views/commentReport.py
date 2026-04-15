@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from django.db.models import Avg
+from projects.models import Project
 
 class CommentReportList(APIView):
   permission_classes = ([IsAuthenticated])

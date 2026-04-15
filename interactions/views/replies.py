@@ -7,7 +7,7 @@ from ..serializers import CommentSerializer , RatingSerializer , ReplySerializer
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
-
+from projects.models import Project
 
 class replyList(APIView):
   def check(self , request , id , commentId):

@@ -1,10 +1,12 @@
 from django.db import models
 from django.conf import settings
+from projects.models import Project
+
 # Create your models here.
 
 class Comment(models.Model):
-  project = models.ForeignKey('projects.Project' , on_delete=models.CASCADE)
-  author = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
+  project = models.ForeignKey(Project , on_delete=models.CASCADE)
+  author = models.ForeignKey('accounts.UserProfile' , on_delete=models.CASCADE)
   text = models.TextField(max_length=500)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
@@ -14,7 +16,7 @@ class Comment(models.Model):
 
 class Reply(models.Model):
   comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
-  author = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
+  author = models.ForeignKey('accounts.UserProfile' , on_delete=models.CASCADE)
   text = models.TextField(max_length=500)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
@@ -24,8 +26,8 @@ class Reply(models.Model):
 
 
 class Rating(models.Model):
-  project = models.ForeignKey('projects.Project' , on_delete=models.CASCADE)
-  user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
+  project = models.ForeignKey(Project , on_delete=models.CASCADE)
+  user = models.ForeignKey('accounts.UserProfile' , on_delete=models.CASCADE)
   score = models.IntegerField()
   created_at = models.DateTimeField(auto_now_add=True)
   
@@ -43,8 +45,8 @@ class ProjectReport(models.Model):
     ('fraud' , 'Fraud'),
     ('other' , 'Other')
   ]
-  project = models.ForeignKey('projects.Project' , on_delete=models.CASCADE)
-  reporter = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
+  project = models.ForeignKey(Project , on_delete=models.CASCADE)
+  reporter = models.ForeignKey('accounts.UserProfile' , on_delete=models.CASCADE)
   reason = models.CharField(max_length=20 , choices=Reason_Choices , default='other')
   created_at = models.DateTimeField(auto_now_add=True)
   
@@ -60,7 +62,7 @@ class CommentReport(models.Model):
     ('other' , 'Other')
   ]
   comment = models.ForeignKey(Comment , on_delete=models.CASCADE)
-  reporter = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
+  reporter = models.ForeignKey('accounts.UserProfile' , on_delete=models.CASCADE)
   reason = models.CharField(max_length=30 , choices=Reason_Choices , default='other')
   created_at = models.DateTimeField(auto_now_add=True)
   
@@ -75,7 +77,7 @@ class ReplyReport(models.Model):
   ('other' , 'Other')
   ]
   reply = models.ForeignKey(Reply , on_delete=models.CASCADE)
-  reporter = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
+  reporter = models.ForeignKey('accounts.UserProfile' , on_delete=models.CASCADE)
   reason = models.CharField(max_length=30 , choices=Reason_Choices , default='other')
   created_at = models.DateTimeField(auto_now_add=True)
   
