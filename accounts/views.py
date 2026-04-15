@@ -6,9 +6,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import UserProfile
 from rest_framework.pagination import CursorPagination
+from rest_framework.throttling import UserRateThrottle
 # Create your views here.
 class UsersView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)
@@ -53,6 +55,7 @@ class UserCursorPagination(CursorPagination):
     ordering = 'id'
 class AdminsView(APIView):
     permission_classes = [IsAuthenticated,IsAdminUser]
+    throttle_classes = [UserRateThrottle]
     def get(self,request, id=None):
         if id is not None:
             try:

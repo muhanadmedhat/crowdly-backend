@@ -155,6 +155,10 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
     'PAGE_SIZE': 12,
+    'DEFAULT_THROTTLE_RATES': {
+        'anon' : '5/minute',
+        'user': '100/day'
+    }
 } 
 CORS_ALLOW_CREDENTIALS = True
 if os.getenv("FRONTEND_URL"):

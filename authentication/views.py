@@ -1,4 +1,5 @@
-from rest_framework.views import APIView,Response,status
+from rest_framework.views import APIView, Response, status
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from .serializers import RegisterSerializer
 from accounts.models import UserProfile
 from .utils import send_verification_email,verify_token
@@ -10,6 +11,7 @@ from django.core import signing
 # Create your views here.
 
 class RegisterView(APIView):
+    throttle_classes = [AnonRateThrottle]
     def post(self,request):
         serializer = RegisterSerializer(data=request.data)
         if (serializer.is_valid()):
@@ -19,6 +21,7 @@ class RegisterView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
+    throttle_classes = [AnonRateThrottle]
     def post(self,request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -41,6 +44,7 @@ class LoginView(APIView):
         return response
     
 class EmailVerificationView(APIView):
+    throttle_classes = [AnonRateThrottle]
     def get(self,request):
         token = request.query_params.get('token')
         try:
@@ -54,6 +58,7 @@ class EmailVerificationView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
     def post(self, request):
         token = request.COOKIES.get("refresh_token")
         if not token:
@@ -72,6 +77,7 @@ class LogoutView(APIView):
             return Response({"message": "invalid token"}, status=400)
         
 class CookieTokenRefreshView(TokenRefreshView):
+    throttle_classes = [AnonRateThrottle]
     def post(self,request):
         token = request.COOKIES.get("refresh_token")
         if not token:
