@@ -14,6 +14,8 @@ from dotenv import load_dotenv
 import dj_database_url
 from pathlib import Path
 
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'projects',
+    'rest_framework',
     
 ]
 
@@ -76,7 +80,7 @@ WSGI_APPLICATION = 'crowdlyBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-load_dotenv()
+
 
 DATABASES = {
     "default": dj_database_url.parse(os.getenv("DATABASE_URL"))
