@@ -2,8 +2,7 @@ from django.urls import path
 
 from .views import category_views, tags_views, featured_views
 from .views import projectImageUpload_views
-from .views import (
-    CategoryListAPIView,
+from .projectViews import (
     ProjectListCreateAPIView,
     ProjectDetailAPIView,
     ProjectsByCategoryAPIView,

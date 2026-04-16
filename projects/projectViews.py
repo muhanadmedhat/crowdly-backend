@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from rest_framework.response import Response
 
 from .models import Project, Category
-from .serializers import (
+from .projectSerializers import (
     CategorySerializer,
     ProjectListSerializer,
     ProjectDetailSerializer,

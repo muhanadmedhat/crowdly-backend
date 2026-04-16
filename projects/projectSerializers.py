@@ -1,17 +1,9 @@
 from rest_framework import serializers
+
+from projects.serializers.category_ser import CategorySerializer
+from projects.serializers.tag_ser import TagSerializer
 from .models import Category, Tag, Project
 
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['id', 'name']
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'name']
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
@@ -26,6 +18,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             'title',
             'details',
             'total_target',
+            'total_donated',
             'start_time',
             'end_time',
             'is_cancelled',
@@ -49,6 +42,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'title',
             'details',
             'total_target',
+            'total_donated',
             'start_time',
             'end_time',
             'is_cancelled',
@@ -74,6 +68,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
             'title',
             'details',
             'total_target',
+            'total_donated',
             'start_time',
             'end_time',
             'category',
