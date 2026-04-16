@@ -9,3 +9,5 @@ class TagListCreateView(generics.ListCreateAPIView): # GET /tags/  POST /tags/
     def get_permissions(self):
         if self.request.method == 'POST':
             return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+        

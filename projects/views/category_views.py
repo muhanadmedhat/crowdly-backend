@@ -7,9 +7,11 @@ from ..serializers.category_ser import CategorySerializer
 class CategoryListCreateView(generics.ListCreateAPIView): # GET /categories/  POST /categories/
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = None
 
     def perform_create(self, serializer):
      serializer.save(created_by=self.request.user)
+
     def get_permissions(self):
         if self.request.method == 'POST':
             return [permissions.IsAdminUser()]  # only admin can create

@@ -4,7 +4,7 @@ from .project_model import Project
 
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
-    image   = models.ImageField(upload_to='media/projects/')
+    image   = models.ImageField(upload_to='projects/')
     order   = models.IntegerField(default=0)
 
     def __str__(self):
