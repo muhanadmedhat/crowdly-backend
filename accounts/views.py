@@ -17,7 +17,6 @@ class UsersView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
-
            user = request.user
            token = request.COOKIES.get("refresh_token")
            user.delete()

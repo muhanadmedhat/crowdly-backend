@@ -8,7 +8,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.throttling import UserRateThrottle
 from rest_framework import status
 from .serializers import DonationSerializer
-from projects.models import Projects
+from projects.models import Project
 from accounts.models import UserProfile
 from .models import Donations
 from django.db import transaction
@@ -72,7 +72,7 @@ class userView(APIView):
         return paginator.get_paginated_response(serializer.data)
     
     def post(self, request, project_id):
-        project = Projects.objects.get(id=project_id)
+        project = Project.objects.get(id=project_id)
         serializer = DonationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(donor=request.user, project=project)
@@ -110,7 +110,7 @@ class StripeWebhookView(APIView):
             amount = intent['amount'] / 100
 
             with transaction.atomic():
-                project = Projects.objects.get(id=project_id)
+                project = Project.objects.get(id=project_id)
                 donor = UserProfile.objects.get(id=donor_id)
                 Donations.objects.create(
                     donor=donor,

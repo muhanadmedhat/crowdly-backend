@@ -67,7 +67,7 @@ class LogoutView(APIView):
         if not token:
             return Response({"message": "no token"}, status=400)
         try:
-            refresh = RefreshToken(token)
+            refresh = RefreshToken(token) 
             refresh.blacklist()
             response = Response({"message": "logged out"}, status=200)
             response.delete_cookie(
@@ -87,7 +87,7 @@ class CookieTokenRefreshView(TokenRefreshView):
             return Response({"message": "no token"}, status=400)
         
         try:
-            data = request.data.copy()
+            data = request.data.copy() 
             data['refresh'] = token
             serializer = self.get_serializer(data=data)
             try:

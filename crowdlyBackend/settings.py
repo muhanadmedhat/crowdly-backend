@@ -15,6 +15,8 @@ import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +48,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'interactions',
+    'projects',
     "django.contrib.sites",
     "allauth",
     "allauth.account",
@@ -53,8 +57,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
     "dj_rest_auth.registration",
-    "dontations",
-    "projects"
+    "donations",
 ]
 SITE_ID = 1
 AUTH_USER_MODEL = 'accounts.UserProfile'
@@ -94,7 +97,7 @@ WSGI_APPLICATION = 'crowdlyBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-load_dotenv()
+
 
 DATABASES = {
     "default": dj_database_url.parse(os.getenv("DATABASE_URL"))
@@ -136,6 +139,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -168,8 +173,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 12,
+    'DEFAULT_PAGINATION_CLASS': 'utils.pagination.CustomCursorPagination',
     'DEFAULT_THROTTLE_RATES': {
         'anon' : '5/minute',
         'user': '100/day'
