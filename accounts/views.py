@@ -53,6 +53,7 @@ class UsersView(APIView):
         
 class UserCursorPagination(CursorPagination):
     ordering = 'id'
+    page_size = 12
 class AdminsView(APIView):
     permission_classes = [IsAuthenticated,IsAdminUser]
     throttle_classes = [UserRateThrottle]

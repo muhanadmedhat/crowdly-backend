@@ -14,3 +14,4 @@ requests==2.32.3
 google-auth==2.38.0
 django-allauth==0.61.1
 dj-rest-auth[with_social]==7.0.0
+stripe==11.4.1
