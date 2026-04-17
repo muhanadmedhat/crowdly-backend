@@ -1,10 +1,10 @@
 from rest_framework import generics, permissions
 from ..models.project_model import Project
-from ..serializers.project_ser import ProjectSerializer
+from ..projectSerializers import ProjectListSerializer
 
 
 class FeaturedProjectsView(generics.ListAPIView):  # GET /projects/featured/
-    serializer_class = ProjectSerializer
+    serializer_class = ProjectListSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 

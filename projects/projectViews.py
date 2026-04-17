@@ -14,12 +14,6 @@ from .projectSerializers import (
 from .permissions import IsOwnerOrReadOnly
 
 
-class CategoryListAPIView(generics.ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = [permissions.AllowAny]
-
-
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -31,6 +25,8 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
         category_id = self.request.query_params.get('category')
         search = self.request.query_params.get('search')
         sort = self.request.query_params.get('sort')
+        status_filter = self.request.query_params.get('status')
+        is_featured = self.request.query_params.get('is_featured')
 
         if category_id:
             queryset = queryset.filter(category_id=category_id)
@@ -39,9 +35,19 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
             queryset = queryset.filter(
                 Q(title__icontains=search) |
                 Q(details__icontains=search) |
-                Q(tags_name_icontains=search) |
-                Q(category_name_icontains=search)
+                Q(tags__name__icontains=search) |
+                Q(category__name__icontains=search)
             ).distinct()
+
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        if is_featured is not None:
+            is_featured_normalized = is_featured.strip().lower()
+            if is_featured_normalized in ['true', '1', 'yes']:
+                queryset = queryset.filter(is_featured=True)
+            elif is_featured_normalized in ['false', '0', 'no']:
+                queryset = queryset.filter(is_featured=False)
 
         # sort examples:
         # ?sort=latest
@@ -105,7 +111,10 @@ class LatestProjectsAPIView(generics.ListAPIView):
     def get_queryset(self):
         return Project.objects.select_related(
             'owner', 'category'
-        ).prefetch_related('tags').order_by('-created_at')[:5]
+        ).prefetch_related('tags').filter(
+            status='running',
+            is_cancelled=False
+        ).order_by('-created_at')[:5]
 
 
 class SimilarProjectsAPIView(generics.ListAPIView):
@@ -120,7 +129,7 @@ class SimilarProjectsAPIView(generics.ListAPIView):
         except Project.DoesNotExist:
             return Project.objects.none()
 
-        tag_ids = current_project.tags.values_list('id', flat=True)
+        tags = current_project.tags.values_list('id', flat=True)
 
         queryset = Project.objects.select_related(
             'owner', 'category'
@@ -130,8 +139,8 @@ class SimilarProjectsAPIView(generics.ListAPIView):
             id=current_project.id
         )
 
-        if tag_ids:
-            queryset = queryset.filter(tags__in=tag_ids).distinct()
+        if tags:
+            queryset = queryset.filter(tags__in=tags).distinct()
 
         return queryset[:5]
 
@@ -160,6 +169,7 @@ def cancel_project(request, pk):
         )
 
     project.is_cancelled = True
+    project.status = 'cancelled'
     project.save()
 
     return Response(

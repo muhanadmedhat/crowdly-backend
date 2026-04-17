@@ -4,6 +4,12 @@ from .category_model import Category
 from .tag_model import Tag
 
 class Project(models.Model):
+    status_choices = [
+        ('running', 'Running'),
+        ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
+    ]
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -22,12 +28,14 @@ class Project(models.Model):
 
     title = models.CharField(max_length=200)
     details = models.TextField()
+    status = models.CharField(max_length=20, choices=status_choices, default='running')
     total_target = models.DecimalField(max_digits=12, decimal_places=2)
     total_donated = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
     is_cancelled = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

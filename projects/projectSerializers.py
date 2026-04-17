@@ -17,6 +17,8 @@ class ProjectListSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'details',
+            'status',
+            'is_featured',
             'total_target',
             'total_donated',
             'start_time',
@@ -41,6 +43,8 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'details',
+            'status',
+            'is_featured',
             'total_target',
             'total_donated',
             'start_time',
@@ -55,7 +59,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
 
 
 class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
-    tag_ids = serializers.PrimaryKeyRelatedField(
+    tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
         write_only=True,
@@ -67,14 +71,17 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'title',
             'details',
+            'status',
+            'is_featured',
             'total_target',
             'total_donated',
             'start_time',
             'end_time',
             'category',
-            'tag_ids',
+            'tags',
             'is_cancelled',
         ]
+        read_only_fields = ['is_featured']
 
     def validate(self, attrs):
         start_time = attrs.get('start_time', getattr(self.instance, 'start_time', None))
@@ -86,9 +93,15 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        tags = validated_data.pop('tag_ids', [])
+        tags = validated_data.pop('tags', [])
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
+
+        if validated_data.get('status') == 'cancelled':
+            validated_data['is_cancelled'] = True
+
+        if validated_data.get('is_cancelled'):
+            validated_data['status'] = 'cancelled'
 
         if user is None:
             raise serializers.ValidationError(
@@ -100,7 +113,13 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         return project
 
     def update(self, instance, validated_data):
-        tags = validated_data.pop('tag_ids', None)
+        tags = validated_data.pop('tags', None)
+
+        if validated_data.get('status') == 'cancelled':
+            validated_data['is_cancelled'] = True
+
+        if validated_data.get('is_cancelled') is True:
+            validated_data['status'] = 'cancelled'
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
