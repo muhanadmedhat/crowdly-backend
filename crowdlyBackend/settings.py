@@ -192,13 +192,15 @@ REST_AUTH = {
 # google get verifed autoamtically
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
-CORS_ALLOW_ALL_ORIGINS = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_REQUIRED = False
 CORS_ALLOW_CREDENTIALS = True
-if os.getenv("FRONTEND_URL"):
-    CORS_ALLOWED_ORIGINS = [os.getenv("FRONTEND_URL")]
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    CORS_ALLOWED_ORIGINS = [frontend_url.rstrip('/')]
 else:
     CORS_ALLOWED_ORIGINS = []
-
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["email", "profile"],
@@ -209,3 +211,6 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+SOCIALACCOUNT_ADAPTER = 'authentication.adapters.CustomSocialAccountAdapter'
+ACCOUNT_ADAPTER = 'authentication.adapters.CustomAccountAdapter'

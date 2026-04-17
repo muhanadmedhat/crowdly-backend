@@ -8,7 +8,7 @@ from django.core import signing
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UserSerializer
 from accounts.models import UserProfile
 from .utils import send_verification_email, verify_token
 # Create your views here.
@@ -35,7 +35,11 @@ class LoginView(APIView):
             return Response("account not verified, check your email", status=403)
         refresh = RefreshToken.for_user(user)
         refresh['is_staff'] = user.is_staff  
-        response = Response({'access': str(refresh.access_token)})
+        serializer = UserSerializer(user)
+        response = Response({
+            'access': str(refresh.access_token),
+            'user': serializer.data
+        })
         response.set_cookie (
             key='refresh_token',
             value=str(refresh),
@@ -112,7 +116,7 @@ class CookieTokenRefreshView(TokenRefreshView):
         except Exception as e:
             return Response({"message": str(e)}, status=400)
         
-class GoogleLogin(SocialLoginView):
+class GoogleCallbackView(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = "http://localhost:3000/auth/google/callback" 
+    callback_url = "postmessage" 
     client_class = OAuth2Client

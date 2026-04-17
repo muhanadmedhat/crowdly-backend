@@ -28,3 +28,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password');
         user = UserProfile.objects.create_user(password=password,**validated_data)
         return user
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'username', 'email', 'phone', 'country', 'birth_date', 'is_staff']
