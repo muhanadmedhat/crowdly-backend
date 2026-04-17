@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from projects.models import Project
 
 # Create your views here.
-
+# add get comment for special user
 # list comments for a project and add a comment
 @api_view(['GET' , 'POST'])
 @permission_classes([AllowAny])

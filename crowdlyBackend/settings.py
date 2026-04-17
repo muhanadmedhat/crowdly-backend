@@ -63,9 +63,9 @@ SITE_ID = 1
 AUTH_USER_MODEL = 'accounts.UserProfile'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -192,7 +192,7 @@ REST_AUTH = {
 # google get verifed autoamtically
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
-
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 if os.getenv("FRONTEND_URL"):
     CORS_ALLOWED_ORIGINS = [os.getenv("FRONTEND_URL")]
