@@ -31,8 +31,6 @@ class LoginView(APIView):
         user = UserProfile.objects.filter(email=email).first()
         if user is None or not user.check_password(password):
             return Response("wrong credentials", status=401)
-        if not user.is_active:
-            return Response("account not verified, check your email", status=403)
         refresh = RefreshToken.for_user(user)
         refresh['is_staff'] = user.is_staff  
         serializer = UserSerializer(user)

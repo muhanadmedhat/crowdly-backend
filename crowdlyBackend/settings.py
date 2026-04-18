@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "donations",
+    "admin_panel",
 ]
 SITE_ID = 1
 AUTH_USER_MODEL = 'accounts.UserProfile'

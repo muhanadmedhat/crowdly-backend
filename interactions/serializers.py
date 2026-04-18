@@ -37,21 +37,21 @@ class ProjectReportSerializer(serializers.ModelSerializer):
   project = ProjectDetailSerializer(read_only=True)
   class Meta:
     model = ProjectReport
-    fields = '__all__'
-    read_only_fields = ['id' , 'project','reporter']
+    fields = ['id', 'reporter', 'project', 'reason', 'created_at', 'status', 'admin_notes']
+    read_only_fields = ['id', 'project', 'reporter', 'created_at', 'status', 'admin_notes']
     
 class CommentReportSerializer(serializers.ModelSerializer):
   reporter = UserSerializer(read_only=True)
   comment = CommentSerializer(read_only=True)
   class Meta:
     model = CommentReport
-    fields = '__all__'
-    read_only_fields = ['id','comment','reporter' , 'created_at']
+    fields = ['id', 'reporter', 'comment', 'reason', 'created_at', 'status', 'admin_notes']
+    read_only_fields = ['id', 'comment', 'reporter', 'created_at', 'status', 'admin_notes']
 
 class ReplyReportSerializer(serializers.ModelSerializer):
   reporter = UserSerializer(read_only=True)
   reply = ReplySerializer(read_only=True)
   class Meta:
     model = ReplyReport
-    fields = '__all__'
-    read_only_fields = ['id','reply','reporter' , 'created_at']
+    fields = ['id', 'reporter', 'reply', 'reason', 'created_at', 'status', 'admin_notes']
+    read_only_fields = ['id', 'reply', 'reporter', 'created_at', 'status', 'admin_notes']
