@@ -8,9 +8,12 @@ from django.core import signing
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserSerializer, ResetPasswordSerializer
 from accounts.models import UserProfile
-from .utils import send_verification_email, verify_token
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from .utils import send_verification_email, verify_token,reset_verify_token,send_reset_password
 # Create your views here.
 
 class RegisterView(APIView):
@@ -32,6 +35,7 @@ class LoginView(APIView):
         if user is None or not user.check_password(password):
             return Response("wrong credentials", status=401)
         if not user.is_active:
+            send_verification_email(user)
             return Response("account not verified, check your email", status=403)
         refresh = RefreshToken.for_user(user)
         refresh['is_staff'] = user.is_staff  
@@ -57,10 +61,12 @@ class EmailVerificationView(APIView):
         try:
             user_pk = verify_token(token)
             user = UserProfile.objects.get(pk=user_pk)
+            if user.is_active:
+                return Response({"message": "account is already verified"}, status=200)
             user.is_active = True
             user.save()
             return Response({"message": "account verified"}, status=200)
-        except signing.BadSignature:
+        except Exception:
             return Response({"message": "invalid or expired token"}, status=400)
 
     def post(self, request):
@@ -132,3 +138,40 @@ class GoogleCallbackView(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     callback_url = "postmessage" 
     client_class = OAuth2Client
+class SendResetPasswordView(APIView):
+    throttle_classes = [AnonRateThrottle]        
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"message": "email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        user = UserProfile.objects.filter(email=email).first()
+        if user:
+            send_reset_password(user)
+        return Response({"message": "if the email exists, a reset link has been sent"}, status=status.HTTP_200_OK)
+class ResetPasswordConfirmView(APIView):
+    def get(self,request):
+        uid = request.query_params.get("uid")
+        token = request.query_params.get("token")
+        if not uid or not token:
+            return Response({"message": "invalid or expired link"}, status=status.HTTP_400_BAD_REQUEST)
+        user = reset_verify_token(uid, token)
+        if user:
+            return Response({"message": "valid token"}, status=200)
+        return Response({"message": "invalid or expired link"}, status=400)
+        
+    def post(self,request):
+        uid = request.data.get("uid")
+        token = request.data.get("token")
+        user = reset_verify_token(uid, token)
+        if not user:
+            return Response({"message": "failed to reset password (expired link)"}, status=400)
+        
+        serializer = ResetPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            first_error = list(serializer.errors.values())[0][0] if serializer.errors else "invalid password format"
+            return Response({"message": first_error}, status=400)
+        
+        password = serializer.validated_data.get("password")
+        user.set_password(password)
+        user.save()
+        return Response({"message": "password updated successfully"}, status=200)

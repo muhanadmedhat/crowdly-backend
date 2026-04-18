@@ -14,7 +14,9 @@ from dotenv import load_dotenv
 import dj_database_url
 from pathlib import Path
 from datetime import timedelta
-
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 load_dotenv()
 
 
@@ -58,6 +60,8 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "donations",
+    'cloudinary_storage',
+    'cloudinary',
 ]
 SITE_ID = 1
 AUTH_USER_MODEL = 'accounts.UserProfile'
@@ -188,19 +192,31 @@ REST_AUTH = {
     'JWT_AUTH_SAMESITE': 'Lax',
     'SESSION_LOGIN': False,
 }
-
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv("CLOUDINARY_CLOUD_NAME"),
+    'API_KEY': os.getenv("CLOUDINARY_API_KEY"),
+    'API_SECRET': os.getenv("CLOUDINARY_API_SECRET"),
+}
+cloudinary.config(
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+    secure=True
+)
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # google get verifed autoamtically
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_EMAIL_REQUIRED = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    CORS_ALLOWED_ORIGINS = [frontend    'cloudinary_storage',
+    'cloudinary',_url.rstrip('/')]
+else:
+    CORS_ALLOWED_ORIGINS = []
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["email", "profile"],
