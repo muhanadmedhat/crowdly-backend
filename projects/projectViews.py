@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Count, Avg
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -20,13 +20,17 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Project.objects.select_related(
             'owner', 'category'
-        ).prefetch_related('tags').all()
+        ).prefetch_related('tags', 'images').all()
 
         category_id = self.request.query_params.get('category')
         search = self.request.query_params.get('search')
         sort = self.request.query_params.get('sort')
         status_filter = self.request.query_params.get('status')
         is_featured = self.request.query_params.get('is_featured')
+        total_target = self.request.query_params.get('max_goal')
+        average_rating = self.request.query_params.get('min_rating')
+        
+
 
         if category_id:
             queryset = queryset.filter(category_id=category_id)
@@ -49,6 +53,20 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
             elif is_featured_normalized in ['false', '0', 'no']:
                 queryset = queryset.filter(is_featured=False)
 
+        if total_target:
+            try:
+                total_target_value = float(total_target)
+                queryset = queryset.filter(total_target__lte=total_target_value)
+            except ValueError:
+                pass  # Ignore invalid total_target values
+
+        if average_rating:
+            try:
+                average_rating_value = float(average_rating)
+                queryset = queryset.annotate(avg_rating=Avg('rating__score')).filter(avg_rating__gte=average_rating_value)
+            except ValueError:
+                pass  # Ignore invalid average_rating values
+
         # sort examples:
         # ?sort=latest
         # ?sort=oldest
@@ -62,6 +80,11 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
             queryset = queryset.order_by('total_target')
         elif sort == 'target_desc':
             queryset = queryset.order_by('-total_target')
+
+        queryset = queryset.annotate(
+            average_rating=Avg('rating__score'),
+            rating_count=Count('rating')
+        )
 
         return queryset
 
@@ -77,7 +100,10 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
 class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Project.objects.select_related(
         'owner', 'category'
-    ).prefetch_related('tags').all()
+    ).prefetch_related('tags', 'images').annotate(
+        average_rating=Avg('rating__score'),
+        rating_count=Count('rating')
+    ).all()
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
@@ -101,7 +127,12 @@ class ProjectsByCategoryAPIView(generics.ListAPIView):
         category_id = self.kwargs['category_id']
         return Project.objects.select_related(
             'owner', 'category'
-        ).prefetch_related('tags').filter(category_id=category_id)
+        ).prefetch_related('tags', 'images').filter(
+            category_id=category_id
+        ).annotate(
+            average_rating=Avg('rating__score'),
+            rating_count=Count('rating')
+        )
 
 
 class LatestProjectsAPIView(generics.ListAPIView):
@@ -111,9 +142,12 @@ class LatestProjectsAPIView(generics.ListAPIView):
     def get_queryset(self):
         return Project.objects.select_related(
             'owner', 'category'
-        ).prefetch_related('tags').filter(
+        ).prefetch_related('tags', 'images').filter(
             status='running',
             is_cancelled=False
+        ).annotate(
+            average_rating=Avg('rating__score'),
+            rating_count=Count('rating')
         ).order_by('-created_at')[:5]
 
 
@@ -125,7 +159,7 @@ class SimilarProjectsAPIView(APIView):
 
     def get(self, request, project_id):
         try:
-            current_project = Project.objects.prefetch_related('tags').get(id=project_id)
+            current_project = Project.objects.prefetch_related('tags', 'images').get(id=project_id)
         except Project.DoesNotExist:
             return Response([])
 
@@ -133,9 +167,14 @@ class SimilarProjectsAPIView(APIView):
 
         queryset = Project.objects.select_related(
             'owner', 'category'
-        ).prefetch_related('tags').filter(
+        ).prefetch_related('tags', 'images').filter(
             category=current_project.category
-        ).exclude(id=current_project.id)
+        ).exclude(
+            id=current_project.id
+        ).annotate(
+            average_rating=Avg('rating__score'),
+            rating_count=Count('rating')
+        )
 
         if tags:
             queryset = queryset.filter(tags__in=tags).distinct()

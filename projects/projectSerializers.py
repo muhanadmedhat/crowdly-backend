@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Avg
 
 from projects.serializers.category_ser import CategorySerializer
 from projects.serializers.tag_ser import TagSerializer
@@ -10,6 +11,31 @@ class ProjectListSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
+    cover_image = serializers.SerializerMethodField()
+
+    def get_average_rating(self, obj):
+        annotated_value = getattr(obj, 'average_rating', None)
+        if annotated_value is not None:
+            return float(annotated_value)
+        return obj.rating_set.aggregate(avg=Avg('score'))['avg']
+
+    def get_rating_count(self, obj):
+        annotated_value = getattr(obj, 'rating_count', None)
+        if annotated_value is not None:
+            return int(annotated_value)
+        return obj.rating_set.count()
+
+    def get_cover_image(self, obj):
+        first_image = obj.images.order_by('id').first()
+        if not first_image:
+            return None
+
+        request = self.context.get('request')
+        if request is None:
+            return first_image.image.url
+        return request.build_absolute_uri(first_image.image.url)
 
     class Meta:
         model = Project
@@ -29,6 +55,9 @@ class ProjectListSerializer(serializers.ModelSerializer):
             'owner',
             'category',
             'tags',
+            'average_rating',
+            'rating_count',
+            'cover_image',
         ]
 
 
@@ -36,6 +65,31 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
+    cover_image = serializers.SerializerMethodField()
+
+    def get_average_rating(self, obj):
+        annotated_value = getattr(obj, 'average_rating', None)
+        if annotated_value is not None:
+            return float(annotated_value)
+        return obj.rating_set.aggregate(avg=Avg('score'))['avg']
+
+    def get_rating_count(self, obj):
+        annotated_value = getattr(obj, 'rating_count', None)
+        if annotated_value is not None:
+            return int(annotated_value)
+        return obj.rating_set.count()
+
+    def get_cover_image(self, obj):
+        first_image = obj.images.order_by('id').first()
+        if not first_image:
+            return None
+
+        request = self.context.get('request')
+        if request is None:
+            return first_image.image.url
+        return request.build_absolute_uri(first_image.image.url)
 
     class Meta:
         model = Project
@@ -55,6 +109,9 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'owner',
             'category',
             'tags',
+            'average_rating',
+            'rating_count',
+            'cover_image',
         ]
 
 
