@@ -212,8 +212,7 @@ SOCIALACCOUNT_EMAIL_REQUIRED = False
 CORS_ALLOW_CREDENTIALS = True
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
-    CORS_ALLOWED_ORIGINS = [frontend    'cloudinary_storage',
-    'cloudinary',_url.rstrip('/')]
+    CORS_ALLOWED_ORIGINS = [frontend_url.rstrip('/')]
 else:
     CORS_ALLOWED_ORIGINS = []
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
