@@ -9,7 +9,7 @@ def verify_token(token):
 
 def send_verification_email(user):
     token = generate_token(user)
-    verification_link = f"{settings.FRONTEND_URL}?token={token}"
+    verification_link = f"{settings.FRONTEND_URL}verify?token={token}"
     email_subject = "Verify your email"
     email_body = f"Please click the link below to verify your email:\n\n{verification_link}"
     send_mail(

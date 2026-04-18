@@ -63,6 +63,18 @@ class EmailVerificationView(APIView):
         except signing.BadSignature:
             return Response({"message": "invalid or expired token"}, status=400)
 
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"message": "email is required"}, status=400)       
+        user = UserProfile.objects.filter(email=email).first()
+        if not user:
+            return Response({"message": "if the email exists, a verification link has been sent"}, status=200)  
+        if user.is_active:
+            return Response({"message": "account is already verified"}, status=400)
+        send_verification_email(user)
+        return Response({"message": "verification email sent"}, status=200)
+        
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
