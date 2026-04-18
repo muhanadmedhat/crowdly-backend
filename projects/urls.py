@@ -16,7 +16,7 @@ urlpatterns = [
     path('categories/<int:id>/projects/', category_views.CategoryProjectsView.as_view()),
     path('tags/', tags_views.TagListCreateView.as_view()),
     path('featured/', featured_views.FeaturedProjectsView.as_view()),
-    path('<int:id>/images/', projectImageUpload_views.ProjectImageUploadView.as_view()),
+    path('<int:id>/images/', projectImageUpload_views.ProjectImageView.as_view()),
     path('<int:id>/images/<int:img_id>/', projectImageUpload_views.ProjectImageDeleteView.as_view()),
     path('', ProjectListCreateAPIView.as_view(), name='project-list-create'),
     path('latest/', LatestProjectsAPIView.as_view(), name='latest-projects'),

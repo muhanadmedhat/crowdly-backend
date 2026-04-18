@@ -3,9 +3,12 @@ from ..models.project_model import Project
 from ..models.projectImage_model import ProjectImage
 from ..serializers.projectImage_ser import ProjectImageSerializer
 
-class ProjectImageUploadView(generics.CreateAPIView): # POST   /projects/<id>/images/
-    serializer_class = ProjectImageSerializer
+class ProjectImageView(generics.ListCreateAPIView): # POST, GET -> /projects/<id>/images/
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProjectImageSerializer
+
+    def get_queryset(self):
+        return ProjectImage.objects.filter(project__id=self.kwargs['id'])
 
     def perform_create(self, serializer):
         project = Project.objects.get(id=self.kwargs['id'])
