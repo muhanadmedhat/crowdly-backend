@@ -12,7 +12,9 @@ from projects.models import Project
 from accounts.models import UserProfile
 from .models import Donations
 from django.db import transaction
-# Create your views here.
+from decimal import Decimal
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 class donationsPaginator(CursorPagination):
     ordering = 'id'
     page_size = 12
@@ -79,17 +81,46 @@ class userView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class donationView(APIView):
+class DonationCheckoutView(APIView):
     permission_classes = [IsAuthenticated]
+    
     def post(self, request, project_id):
-        stripe.api_key = settings.STRIPE_SECRET_KEY
         amount = request.data.get("amount")
-        intent = stripe.PaymentIntent.create(
-            amount=int(float(amount) * 100),
-            currency='egp',
-            metadata={'project_id': project_id, 'donor_id': request.user.id}
-        )
-        return Response({'client_secret': intent.client_secret})
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'egp',
+                        'product_data': {
+                            'name': f'Donation to Project #{project_id}',
+                        },
+                        'unit_amount': int(float(amount) * 100), 
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=f'{settings.FRONTEND_URL}donation/success?session_id={{CHECKOUT_SESSION_ID}}',
+                cancel_url=f'{settings.FRONTEND_URL}donation/cancel',
+                payment_intent_data={
+                    'metadata': {
+                        'project_id': project_id,
+                        'donor_id': request.user.id,
+                    }
+                },
+                metadata={
+                    'project_id': project_id,
+                    'donor_id': request.user.id,
+                }
+            )
+            
+            return Response({
+                'checkout_url': checkout_session.url,
+                'session_id': checkout_session.id
+            })
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
 
 
 class StripeWebhookView(APIView):
@@ -103,21 +134,27 @@ class StripeWebhookView(APIView):
             )
         except Exception:
             return Response(status=400)
-        if event['type'] == 'payment_intent.succeeded':
-            intent = event['data']['object']
-            project_id = intent['metadata']['project_id']
-            donor_id = intent['metadata']['donor_id']
-            amount = intent['amount'] / 100
 
-            with transaction.atomic():
-                project = Project.objects.get(id=project_id)
-                donor = UserProfile.objects.get(id=donor_id)
-                Donations.objects.create(
-                    donor=donor,
-                    project=project,
-                    amount=amount
-                )
-                project.total_donated += amount
-                project.save()
+        if event['type'] == 'checkout.session.completed':
+            intent = event['data']['object']
+            try:
+                project_id = int(intent['metadata']['project_id'])
+                donor_id = int(intent['metadata']['donor_id'])
+
+                amount = Decimal(str(intent['amount'])) / Decimal('100')
+
+                with transaction.atomic():
+                    project = Project.objects.get(id=project_id)
+                    donor = UserProfile.objects.get(id=donor_id)
+                    Donations.objects.create(
+                        donor=donor,
+                        project=project,
+                        amount=amount
+                    )
+                    project.total_donated = (project.total_donated or Decimal('0')) + amount
+                    project.save()
+            except Exception as e:
+                import traceback
+                return Response({'error': str(e)}, status=500)
 
         return Response({'status': 'ok'})

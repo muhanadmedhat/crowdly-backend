@@ -151,8 +151,26 @@ class LatestProjectsAPIView(generics.ListAPIView):
         ).order_by('-created_at')[:5]
 
 
+<<<<<<< Updated upstream
 from rest_framework.views import APIView
 from rest_framework.response import Response
+=======
+class MyProjectsAPIView(generics.ListAPIView):
+    serializer_class = ProjectListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Project.objects.select_related(
+            'owner', 'category'
+        ).prefetch_related('tags').filter(
+            owner=self.request.user
+        ).order_by('-created_at')
+
+
+class SimilarProjectsAPIView(generics.ListAPIView):
+    serializer_class = ProjectListSerializer
+    permission_classes = [permissions.AllowAny]
+>>>>>>> Stashed changes
 
 class SimilarProjectsAPIView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -179,9 +197,14 @@ class SimilarProjectsAPIView(APIView):
         if tags:
             queryset = queryset.filter(tags__in=tags).distinct()
 
+<<<<<<< Updated upstream
         queryset = queryset.order_by('-is_featured', 'id')[:5]
         serializer = ProjectListSerializer(queryset, many=True)
         return Response(serializer.data)
+=======
+        return queryset.order_by('id')
+
+>>>>>>> Stashed changes
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
