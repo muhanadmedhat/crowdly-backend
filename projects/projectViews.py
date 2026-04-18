@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Project, Category
 from .projectSerializers import (
@@ -151,10 +152,6 @@ class LatestProjectsAPIView(generics.ListAPIView):
         ).order_by('-created_at')[:5]
 
 
-<<<<<<< Updated upstream
-from rest_framework.views import APIView
-from rest_framework.response import Response
-=======
 class MyProjectsAPIView(generics.ListAPIView):
     serializer_class = ProjectListSerializer
     permission_classes = [IsAuthenticated]
@@ -162,15 +159,10 @@ class MyProjectsAPIView(generics.ListAPIView):
     def get_queryset(self):
         return Project.objects.select_related(
             'owner', 'category'
-        ).prefetch_related('tags').filter(
+        ).prefetch_related('tags', 'images').filter(
             owner=self.request.user
         ).order_by('-created_at')
 
-
-class SimilarProjectsAPIView(generics.ListAPIView):
-    serializer_class = ProjectListSerializer
-    permission_classes = [permissions.AllowAny]
->>>>>>> Stashed changes
 
 class SimilarProjectsAPIView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -197,14 +189,10 @@ class SimilarProjectsAPIView(APIView):
         if tags:
             queryset = queryset.filter(tags__in=tags).distinct()
 
-<<<<<<< Updated upstream
         queryset = queryset.order_by('-is_featured', 'id')[:5]
         serializer = ProjectListSerializer(queryset, many=True)
         return Response(serializer.data)
-=======
-        return queryset.order_by('id')
 
->>>>>>> Stashed changes
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
