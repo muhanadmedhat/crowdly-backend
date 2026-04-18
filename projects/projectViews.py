@@ -117,17 +117,17 @@ class LatestProjectsAPIView(generics.ListAPIView):
         ).order_by('-created_at')[:5]
 
 
-class SimilarProjectsAPIView(generics.ListAPIView):
-    serializer_class = ProjectListSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class SimilarProjectsAPIView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def get_queryset(self):
-        project_id = self.kwargs['project_id']
-
+    def get(self, request, project_id):
         try:
             current_project = Project.objects.prefetch_related('tags').get(id=project_id)
         except Project.DoesNotExist:
-            return Project.objects.none()
+            return Response([])
 
         tags = current_project.tags.values_list('id', flat=True)
 
@@ -135,15 +135,14 @@ class SimilarProjectsAPIView(generics.ListAPIView):
             'owner', 'category'
         ).prefetch_related('tags').filter(
             category=current_project.category
-        ).exclude(
-            id=current_project.id
-        )
+        ).exclude(id=current_project.id)
 
         if tags:
             queryset = queryset.filter(tags__in=tags).distinct()
 
-        return queryset[:5]
-
+        queryset = queryset.order_by('-is_featured', 'id')[:5]
+        serializer = ProjectListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])

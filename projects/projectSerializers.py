@@ -69,6 +69,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = [
+            'id',
             'title',
             'details',
             'status',
@@ -81,7 +82,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
             'tags',
             'is_cancelled',
         ]
-        read_only_fields = ['is_featured']
+        read_only_fields = ['id','is_featured']
 
     def validate(self, attrs):
         start_time = attrs.get('start_time', getattr(self.instance, 'start_time', None))
