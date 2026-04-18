@@ -8,6 +8,11 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from projects.models import Project
+from rest_framework.pagination import CursorPagination
+
+class ReplyPagination(CursorPagination):
+  ordering = 'created_at'
+  page_size = 5
 
 class replyList(APIView):
   def check(self , request , id , commentId):
@@ -26,8 +31,10 @@ class replyList(APIView):
     if not isinstance(comment , Comment):
       return comment
     replies = Reply.objects.filter(comment=comment)
-    repliesSerialized = ReplySerializer(replies , many=True)
-    return Response({"replies":repliesSerialized.data} , status=status.HTTP_200_OK)
+    paginator = ReplyPagination()
+    result = paginator.paginate_queryset(replies , request)
+    repliesSerialized = ReplySerializer(result , many=True)
+    return paginator.get_paginated_response(repliesSerialized.data)
   
   def post(self,request,id,commentId):
     if not request.user.is_authenticated:

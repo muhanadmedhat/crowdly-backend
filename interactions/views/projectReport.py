@@ -9,6 +9,11 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from django.db.models import Avg
 from projects.models import Project
+from rest_framework.pagination import CursorPagination
+
+class ReportProjectPagination(CursorPagination):
+  ordering ='created_at'
+  page_size=5
 
 class projectReportList(APIView):
   permission_classes=([IsAuthenticated])
@@ -36,6 +41,8 @@ class projectReportList(APIView):
     if not isinstance(project,Project):
       return project
     reports = ProjectReport.objects.filter(project = project)
-    reportsSerialized = ProjectReportSerializer(reports , many=True)
-    return Response(reportsSerialized.data , status=status.HTTP_200_OK)
+    paginator = ReportProjectPagination()
+    result = paginator.paginate_queryset(reports,request)
+    reportsSerialized = ProjectReportSerializer(result , many=True)
+    return paginator.get_paginated_response(reportsSerialized.data)
     

@@ -8,10 +8,14 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from projects.models import Project
+from rest_framework.pagination import CursorPagination
 
 # Create your views here.
 # add get comment for special user
 # list comments for a project and add a comment
+class CommentPagination(CursorPagination):
+  ordering = 'created_at'
+  page_size = 5
 @api_view(['GET' , 'POST'])
 @permission_classes([AllowAny])
 def commentList(request,id):
@@ -21,8 +25,10 @@ def commentList(request,id):
   
   if request.method == 'GET':
     comments = Comment.objects.filter(project=project)
-    commentsSerialized = CommentSerializer(comments , many=True)
-    return Response({"comments":commentsSerialized.data} , status=status.HTTP_200_OK)
+    paginator = CommentPagination()
+    result = paginator.paginate_queryset(comments,request)
+    commentsSerialized = CommentSerializer(result , many=True)
+    return paginator.get_paginated_response(commentsSerialized.data)
   else:
     if not request.user.is_authenticated:
       return Response({"message":"You must be logged in first"} , status=status.HTTP_401_UNAUTHORIZED)

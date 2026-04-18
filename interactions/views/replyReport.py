@@ -9,7 +9,11 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from django.db.models import Avg
 from projects.models import Project
+from rest_framework.pagination import CursorPagination
 
+class ReplyReportPagination(CursorPagination):
+  ordering ='created_at'
+  page_size=5
 
 class replyReportList(APIView):
   permission_classes = ([IsAuthenticated])
@@ -33,8 +37,10 @@ class replyReportList(APIView):
     if not isinstance(reply,Reply):
       return reply
     repliesReport = ReplyReport.objects.filter(reply=reply)
-    repliesReportSerialized = ReplyReportSerializer(repliesReport , many=True)
-    return Response(repliesReportSerialized.data , status=status.HTTP_200_OK)
+    paginator = ReplyReportPagination()
+    result = paginator.paginate_queryset(repliesReport , request)
+    repliesReportSerialized = ReplyReportSerializer(result , many=True)
+    return paginator.get_paginated_response(repliesReportSerialized.data)
   
   def post(self,request,id,commentId,replyId):
     reply = self.check(request,id,commentId,replyId)
