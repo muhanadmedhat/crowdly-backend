@@ -135,7 +135,7 @@ class StripeWebhookView(APIView):
         except Exception:
             return Response(status=400)
 
-        if event['type'] == 'checkout.session.completed':
+        if event['type'] == 'payment_intent.succeeded':
             intent = event['data']['object']
             try:
                 project_id = int(intent['metadata']['project_id'])
