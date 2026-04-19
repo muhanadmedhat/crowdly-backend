@@ -5,7 +5,7 @@ from cloudinary.models import CloudinaryField
 
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
-    image = CloudinaryField('image', folder='projects',  blank=True, null=True)
+    image = CloudinaryField('image', folder='crowdly/projects',  blank=True, null=True)
     order   = models.IntegerField(default=0)
 
     def __str__(self):
