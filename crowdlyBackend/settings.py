@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-r$h=bk*q#a6&0&=2t0!katy_y*z*3spo)kamt&d^3rt#rfyyxg'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -180,7 +180,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'utils.pagination.CustomCursorPagination',
     'DEFAULT_THROTTLE_RATES': {
         'anon' : '5/minute',
-        'user': '5000/day'
+        'user': '5111000/day'
     }
 } 
 
