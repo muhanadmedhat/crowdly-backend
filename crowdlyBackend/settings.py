@@ -180,7 +180,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'utils.pagination.CustomCursorPagination',
     'DEFAULT_THROTTLE_RATES': {
         'anon' : '5/minute',
-        'user': '3000/day'
+        'user': '5000/day'
     }
 } 
 
