@@ -8,12 +8,12 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from projects.models import Project
-from rest_framework.pagination import CursorPagination
+from utils.pagination import CustomCursorPagination
 
 # Create your views here.
 # add get comment for special user
 # list comments for a project and add a comment
-class CommentPagination(CursorPagination):
+class CommentPagination(CustomCursorPagination):
   ordering = 'created_at'
   page_size = 5
 @api_view(['GET' , 'POST'])

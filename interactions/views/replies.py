@@ -8,9 +8,9 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from projects.models import Project
-from rest_framework.pagination import CursorPagination
+from utils.pagination import CustomCursorPagination
 
-class ReplyPagination(CursorPagination):
+class ReplyPagination(CustomCursorPagination):
   ordering = 'created_at'
   page_size = 5
 

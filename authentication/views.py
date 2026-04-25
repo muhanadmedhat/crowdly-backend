@@ -48,8 +48,8 @@ class LoginView(APIView):
             key='refresh_token',
             value=str(refresh),
             httponly=True,
-            # secure=True,
-            samesite='Lax',
+            secure=True,
+            samesite='None',
             max_age=7 * 24 * 60 * 60
         )
         return response
